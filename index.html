@@ -1,0 +1,2747 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Physics Quest Pro - Тренажер по физике</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚀</text></svg>">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Press+Start+2P&display=swap');
+        scroll-behavior: smooth; /* Включает плавную прокрутку */
+        scroll-padding-top: 100px; /* Отступ сверху, чтобы меню не перекрывало контент при прокрутке */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6C63FF;
+            --secondary: #FF6584;
+            --accent: #43D9E8;
+            --success: #51CF66;
+            --warning: #FFD43B;
+            --dark: #2D3436;
+            --light: #F8F9FA;
+            --gradient-1: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-2: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --gradient-3: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--gradient-1);
+            min-height: 100vh;
+            overflow-x: hidden;
+            transition: padding-top 0.3s;
+        }
+
+        /* Навигация */
+        .navbar {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px 30px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: transform 0.3s;
+        }
+        
+        .navbar.hidden {
+            transform: translateY(-100%);
+        }
+
+        .nav-logo {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1.2em;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .nav-btn {
+            background: none;
+            border: none;
+            color: var(--dark);
+            font-weight: 700;
+            cursor: pointer;
+            padding: 10px 20px;
+            border-radius: 8px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-btn:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .user-avatar-nav {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--accent);
+            cursor: pointer;
+        }
+
+        /* Частицы */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 0;
+        }
+
+        .particle {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: float 15s infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100vh) rotate(720deg); opacity: 0; }
+        }
+
+        /* Страницы */
+        .page {
+            display: none;
+            padding: 100px 20px 40px;
+            min-height: 100vh;
+            position: relative;
+            z-index: 1;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* Главная */
+        .main-page {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .logo-container {
+            text-align: center;
+            margin-bottom: 40px;
+            animation: bounceIn 1s ease;
+        }
+
+        .logo-icon {
+            font-size: 80px;
+            color: var(--accent);
+            text-shadow: 0 0 30px rgba(67, 217, 232, 0.6);
+            animation: pulse 2s infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.05); }
+            70% { transform: scale(0.9); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        h1 {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 2.5em;
+            color: white;
+            text-shadow: 4px 4px 0px var(--secondary);
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+
+        .subtitle {
+            font-size: 1.3em;
+            color: var(--accent);
+            font-weight: 600;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        .start-button {
+            background: linear-gradient(45deg, var(--secondary), #FF8787);
+            color: white;
+            border: none;
+            padding: 25px 60px;
+            font-size: 1.5em;
+            font-weight: 800;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(255, 101, 132, 0.4);
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            position: relative;
+            overflow: hidden;
+            margin: 10px auto;
+            display: block;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .start-button:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            transition: 0.5s;
+        }
+
+        .start-button:hover:before {
+            left: 100%;
+        }
+
+        .start-button:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 15px 40px rgba(255, 101, 132, 0.6);
+        }
+
+        .features {
+            display: flex;
+            gap: 30px;
+            margin-top: 50px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 25px;
+            border-radius: 20px;
+            text-align: center;
+            width: 200px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: transform 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+        }
+
+        .feature-icon {
+            font-size: 40px;
+            margin-bottom: 15px;
+        }
+
+        /* Формы авторизации */
+        .auth-container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .auth-title {
+            text-align: center;
+            font-size: 2em;
+            color: var(--dark);
+            margin-bottom: 30px;
+            font-weight: 800;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--dark);
+            font-weight: 600;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 15px;
+            border: 3px solid #E9ECEF;
+            border-radius: 12px;
+            font-size: 1em;
+            transition: all 0.3s;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 5px rgba(108, 99, 255, 0.1);
+        }
+
+        .auth-button {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(45deg, var(--primary), #7950F2);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+
+        .auth-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(108, 99, 255, 0.4);
+        }
+
+        .auth-switch {
+            text-align: center;
+            margin-top: 20px;
+            color: #666;
+        }
+
+        .auth-switch a {
+            color: var(--primary);
+            cursor: pointer;
+            font-weight: 700;
+        }
+
+        /* Личный кабинет */
+        .profile-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 30px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .profile-header {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+
+        .profile-avatar-container {
+            position: relative;
+        }
+
+        .profile-avatar {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 5px solid var(--accent);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .avatar-upload {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: var(--primary);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .avatar-upload:hover {
+            background: var(--secondary);
+            transform: scale(1.1);
+        }
+
+        .profile-info h2 {
+            color: var(--dark);
+            margin-bottom: 10px;
+            font-size: 2em;
+        }
+
+        .profile-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea20, #764ba220);
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            border-left: 5px solid var(--primary);
+        }
+
+        .stat-value {
+            font-size: 2.5em;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #666;
+            font-weight: 600;
+        }
+
+        .profile-section {
+            margin-top: 40px;
+        }
+
+        .section-title {
+            font-size: 1.5em;
+            color: var(--dark);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .results-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .result-item {
+            background: #F8F9FA;
+            padding: 20px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .result-topic {
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .result-score {
+            background: var(--success);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: 700;
+        }
+
+        /* Темы */
+        .topics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .topic-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .topic-card:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            transform: scaleX(0);
+            transition: transform 0.3s;
+        }
+
+        .topic-card:hover:before {
+            transform: scaleX(1);
+        }
+
+        .topic-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        .topic-icon {
+            font-size: 50px;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .topic-title {
+            font-size: 1.4em;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 10px;
+        }
+
+        .topic-desc {
+            color: #666;
+            font-size: 0.95em;
+            margin-bottom: 15px;
+        }
+
+        .topic-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 700;
+            margin-top: 10px;
+        }
+
+        .badge-oge {
+            background: #FFE066;
+            color: #F08C00;
+        }
+
+        .badge-ege {
+            background: #FF8787;
+            color: #C92A2A;
+        }
+
+        .badge-game {
+            background: #43D9E8;
+            color: white;
+        }
+
+        /* Игры */
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .game-card {
+            background: white;
+            border-radius: 25px;
+            overflow: hidden;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+            transition: transform 0.3s;
+        }
+
+        .game-card:hover {
+            transform: translateY(-10px);
+        }
+
+        .game-preview {
+            height: 250px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 80px;
+        }
+
+        .game-info {
+            padding: 25px;
+        }
+
+        .game-title {
+            font-size: 1.5em;
+            font-weight: 800;
+            color: var(--dark);
+            margin-bottom: 10px;
+        }
+
+        .game-description {
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .play-button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(45deg, var(--success), #69DB7C);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .play-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(81, 207, 102, 0.4);
+        }
+
+        /* OGE/EGE материалы */
+        .materials-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .material-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .material-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .material-title {
+            font-size: 1.5em;
+            color: var(--dark);
+            font-weight: 700;
+        }
+
+        .material-content {
+            color: #666;
+            line-height: 1.8;
+        }
+
+        .formula-box {
+            background: linear-gradient(135deg, #E7F5FF, #A5D8FF);
+            padding: 20px;
+            border-radius: 12px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            border-left: 5px solid var(--accent);
+        }
+
+        /* Страница задачи */
+        .task-container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 30px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .task-number {
+            background: linear-gradient(45deg, var(--primary), var(--accent));
+            color: white;
+            padding: 10px 25px;
+            border-radius: 25px;
+            font-weight: 700;
+            font-size: 1.1em;
+        }
+
+        .task-points {
+            background: var(--warning);
+            color: var(--dark);
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .task-question {
+            font-size: 1.4em;
+            color: var(--dark);
+            margin-bottom: 25px;
+            line-height: 1.6;
+            font-weight: 600;
+        }
+
+        .task-data {
+            background: linear-gradient(135deg, #667eea20, #764ba220);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            border-left: 5px solid var(--primary);
+        }
+
+        .data-item {
+            margin: 8px 0;
+            color: var(--dark);
+            font-family: 'Courier New', monospace;
+        }
+
+        .answer-input {
+            width: 100%;
+            padding: 20px;
+            font-size: 1.2em;
+            border: 3px solid #E9ECEF;
+            border-radius: 15px;
+            transition: all 0.3s;
+            font-family: 'Montserrat', sans-serif;
+            margin-bottom: 20px;
+        }
+
+        .answer-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 5px rgba(108, 99, 255, 0.1);
+        }
+
+        .buttons-row {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+            min-width: 150px;
+            justify-content: center;
+        }
+
+        .btn-hint {
+            background: linear-gradient(45deg, var(--warning), #FFA94D);
+            color: var(--dark);
+        }
+
+        .btn-solution {
+            background: linear-gradient(45deg, var(--accent), #3BC9DB);
+            color: white;
+        }
+
+        .btn-check {
+            background: linear-gradient(45deg, var(--success), #69DB7C);
+            color: white;
+        }
+
+        .btn-next {
+            background: linear-gradient(45deg, var(--primary), #7950F2);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        .hint-box, .solution-box {
+            display: none;
+            margin-top: 25px;
+            padding: 25px;
+            border-radius: 15px;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .hint-box {
+            background: linear-gradient(135deg, #FFF9DB, #FFE066);
+            border-left: 5px solid var(--warning);
+        }
+
+        .solution-box {
+            background: linear-gradient(135deg, #E7F5FF, #A5D8FF);
+            border-left: 5px solid var(--accent);
+        }
+
+        .solution-step {
+            margin: 15px 0;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+            display: flex;
+            gap: 15px;
+            align-items: flex-start;
+        }
+
+        .step-number {
+            background: var(--primary);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        /* Игровое поле */
+        .game-canvas {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .game-area {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            height: 400px;
+            border-radius: 15px;
+            margin: 20px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .game-object {
+            position: absolute;
+            transition: all 0.1s;
+        }
+
+        .back-button {
+            position: fixed;
+            top: 80px;
+            left: 20px;
+            background: white;
+            color: var(--dark);
+            padding: 15px 25px;
+            border-radius: 12px;
+            border: none;
+            cursor: pointer;
+            font-weight: 700;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            transition: all 0.3s;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .back-button:hover {
+            transform: translateX(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+
+        /* Уведомления */
+        .notification {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            background: white;
+            padding: 20px 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            display: none;
+            align-items: center;
+            gap: 15px;
+            z-index: 2000;
+            animation: slideInRight 0.3s ease;
+        }
+
+        @keyframes slideInRight {
+            from { transform: translateX(400px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .notification.show {
+            display: flex;
+        }
+
+        .notification.success {
+            border-left: 5px solid var(--success);
+        }
+
+        .notification.error {
+            border-left: 5px solid var(--secondary);
+        }
+
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                gap: 15px;
+                padding: 15px;
+            }
+            
+            .nav-menu {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            h1 { font-size: 1.8em; }
+            .topics-grid { grid-template-columns: 1fr; }
+            .task-container { padding: 25px; }
+            .buttons-row { flex-direction: column; }
+            .btn { width: 100%; }
+            .profile-header { flex-direction: column; text-align: center; }
+        }
+
+        /* Конфетти */
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background: var(--secondary);
+            position: absolute;
+            animation: confetti-fall 3s linear forwards;
+            z-index: 3000;
+        }
+
+        @keyframes confetti-fall {
+            0% { transform: translateY(-100px) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
+
+        .hidden-file-input {
+            display: none;
+        }
+        
+        /* Расширенный профиль */
+        .profile-edit-form {
+            margin-top: 25px;
+            padding-top: 25px;
+            border-top: 1px solid #eaeaea;
+        }
+        
+        .profile-edit-form .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .profile-edit-form .form-group label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 8px;
+            display: block;
+        }
+        
+        .profile-edit-form .btn-save {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(45deg, var(--primary), #7950F2);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Навигация -->
+    <nav class="navbar" id="navbar" style="display: none;">
+        <div class="nav-logo">
+            <i class="fas fa-atom"></i>
+            <span>Physics Quest Pro</span>
+        </div>
+        <div class="nav-menu">
+            <button class="nav-btn" onclick="showPage('main')">
+                <i class="fas fa-home"></i> Главная
+            </button>
+            <button class="nav-btn" onclick="showPage('topics')">
+                <i class="fas fa-book"></i> Темы
+            </button>
+            <button class="nav-btn" onclick="showPage('games')">
+                <i class="fas fa-gamepad"></i> Игры
+            </button>
+            <button class="nav-btn" onclick="showPage('oge')">
+                <i class="fas fa-graduation-cap"></i> ОГЭ/ЕГЭ
+            </button>
+            <button class="nav-btn" onclick="showPage('profile')">
+                <i class="fas fa-user"></i> Профиль
+            </button>
+            <button class="nav-btn" onclick="logout()" id="logoutBtn" style="display: none;">
+                <i class="fas fa-sign-out-alt"></i> Выйти
+            </button>
+            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%236C63FF'/%3E%3Ctext x='50' y='50' text-anchor='middle' dy='.3em' fill='white' font-size='40'%3E👤%3C/text%3E%3Csvg%3E" 
+                 alt="Avatar" class="user-avatar-nav" id="navAvatar" onclick="showPage('profile')" style="display: none;">
+        </div>
+    </nav>
+
+    <!-- Частицы -->
+    <div class="particles" id="particles"></div>
+
+    <!-- Уведомления -->
+    <div class="notification" id="notification">
+        <i class="fas fa-check-circle" style="font-size: 24px; color: var(--success);"></i>
+        <span id="notificationText"></span>
+    </div>
+
+    <!-- ГЛАВНАЯ СТРАНИЦА -->
+    <div class="page main-page" id="page-main">
+        <div class="logo-container">
+            <div class="logo-icon">
+                <i class="fas fa-atom"></i>
+            </div>
+            <h1>PHYSICS QUEST PRO</h1>
+            <p class="subtitle">🚀 Погрузись в мир физических открытий! 🌟</p>
+        </div>
+
+        <div id="authButtons" class="active">
+            <button class="start-button" onclick="showPage('login')">
+                <i class="fas fa-sign-in-alt"></i> Войти в систему
+            </button>
+            <button class="start-button" onclick="showPage('register')" style="background: linear-gradient(45deg, #6C63FF, #7950F2);">
+                <i class="fas fa-user-plus"></i> Создать аккаунт
+            </button>
+        </div>
+
+        <div id="userButtons" style="display: none;">
+            <button class="start-button" onclick="showPage('topics')">
+                <i class="fas fa-rocket"></i> Начать обучение!
+            </button>
+        </div>
+
+        <div class="features">
+            <div class="feature-card">
+                <div class="feature-icon">🎯</div>
+                <div class="feature-title">500+ задач</div>
+                <div style="color: #666; font-size: 0.9em;">От простого к сложному</div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🎮</div>
+                <div class="feature-title">Физ-игры</div>
+                <div style="color: #666; font-size: 0.9em;">Учись играючи</div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📚</div>
+                <div class="feature-title">ОГЭ/ЕГЭ</div>
+                <div style="color: #666; font-size: 0.9em;">Подготовка к экзаменам</div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🏆</div>
+                <div class="feature-title">Прокачка</div>
+                <div style="color: #666; font-size: 0.9em;">Стань физиком-гуру!</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- СТРАНИЦА РЕГИСТРАЦИИ -->
+    <div class="page" id="page-register">
+        <div class="auth-container">
+            <h2 class="auth-title">
+                <i class="fas fa-user-plus" style="color: var(--primary);"></i>
+                Регистрация
+            </h2>
+            <form id="registerForm" onsubmit="handleRegister(event)">
+                <div class="form-group">
+                    <label><i class="fas fa-user"></i> Имя пользователя</label>
+                    <input type="text" id="regUsername" required placeholder="Придумайте никнейм">
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-envelope"></i> Email</label>
+                    <input type="email" id="regEmail" required placeholder="your@email.com">
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-lock"></i> Пароль</label>
+                    <input type="password" id="regPassword" required placeholder="••••••••">
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-lock"></i> Подтвердите пароль</label>
+                    <input type="password" id="regPasswordConfirm" required placeholder="••••••••">
+                </div>
+                <button type="submit" class="auth-button">
+                    <i class="fas fa-rocket"></i> Создать аккаунт
+                </button>
+            </form>
+            <div class="auth-switch">
+                Уже есть аккаунт? <a onclick="showPage('login')">Войти</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- СТРАНИЦА ВХОДА -->
+    <div class="page" id="page-login">
+        <div class="auth-container">
+            <h2 class="auth-title">
+                <i class="fas fa-sign-in-alt" style="color: var(--success);"></i>
+                Вход в систему
+            </h2>
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label><i class="fas fa-user"></i> Email или имя</label>
+                    <input type="text" id="loginUsername" required placeholder="Введите email или имя">
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-lock"></i> Пароль</label>
+                    <input type="password" id="loginPassword" required placeholder="Введите пароль">
+                </div>
+                <button type="submit" class="auth-button">
+                    <i class="fas fa-door-open"></i> Войти
+                </button>
+            </form>
+            <div class="auth-switch">
+                Нет аккаунта? <a onclick="showPage('register')">Зарегистрироваться</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ЛИЧНЫЙ КАБИНЕТ -->
+    <div class="page" id="page-profile">
+        <button class="back-button" onclick="showPage('main')">
+            <i class="fas fa-arrow-left"></i> На главную
+        </button>
+        
+        <div class="profile-container">
+            <div class="profile-header">
+                <div class="profile-avatar-container">
+                    <img src="" alt="Avatar" class="profile-avatar" id="profileAvatar">
+                    <div class="avatar-upload" onclick="document.getElementById('avatarInput').click()">
+                        <i class="fas fa-camera"></i>
+                    </div>
+                    <input type="file" id="avatarInput" class="hidden-file-input" accept="image/*" onchange="uploadAvatar(event)">
+                </div>
+                <div class="profile-info">
+                    <h2 id="profileName">Пользователь</h2>
+                    <p style="color: #666;" id="profileEmail">email@example.com</p>
+                    <p style="color: var(--primary); margin-top: 10px; font-weight: 700;">
+                        <i class="fas fa-star"></i> Уровень: <span id="profileLevel">1</span>
+                    </p>
+                </div>
+            </div>
+
+            <div class="profile-stats">
+                <div class="stat-card">
+                    <div class="stat-value" id="statPoints">0</div>
+                    <div class="stat-label"><i class="fas fa-star"></i> Очков опыта</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="statSolved">0</div>
+                    <div class="stat-label"><i class="fas fa-check-circle"></i> Решено задач</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="statStreak">0</div>
+                    <div class="stat-label"><i class="fas fa-fire"></i> Серия побед</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="statTime">0ч</div>
+                    <div class="stat-label"><i class="fas fa-clock"></i> Время обучения</div>
+                </div>
+            </div>
+
+            <div class="profile-section">
+                <h3 class="section-title">
+                    <i class="fas fa-chart-line" style="color: var(--accent);"></i>
+                    История результатов
+                </h3>
+                <div class="results-list" id="resultsList">
+                    <!-- Результаты будут здесь -->
+                </div>
+            </div>
+
+            <div class="profile-section" style="margin-top: 30px;">
+                <button class="btn btn-check" onclick="sendResultsToEmail()" style="width: 100%; padding: 20px; font-size: 1.1em;">
+                    <i class="fas fa-envelope"></i> Отправить результаты на zavul@vk.com
+                </button>
+            </div>
+            
+            <!-- Расширенный профиль -->
+            <div class="profile-section profile-edit-form">
+                <h3 class="section-title">
+                    <i class="fas fa-user-edit" style="color: var(--accent);"></i>
+                    Редактирование профиля
+                </h3>
+                
+                <div class="form-group">
+                    <label for="profileUsername">Имя пользователя</label>
+                    <input type="text" id="profileUsername" class="form-control" placeholder="Введите новое имя">
+                </div>
+                
+                <div class="form-group">
+                    <label for="profileClass">Класс</label>
+                    <input type="text" id="profileClass" class="form-control" placeholder="Введите класс (например: 10Б)">
+                </div>
+                
+                <div class="form-group">
+                    <label for="profileNumber">Номер в классе</label>
+                    <input type="text" id="profileNumber" class="form-control" placeholder="Введите номер">
+                </div>
+                
+                <button class="btn-save" onclick="saveProfile()">
+                    <i class="fas fa-save"></i> Сохранить изменения
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- СТРАНИЦА ТЕМ -->
+    <div class="page" id="page-topics">
+        <button class="back-button" onclick="showPage('main')">
+            <i class="fas fa-arrow-left"></i> На главную
+        </button>
+
+        <div style="text-align: center; margin-bottom: 40px; color: white;">
+            <h2 style="font-size: 2.5em; margin-bottom: 10px; text-shadow: 3px 3px 0 var(--secondary);">
+                <i class="fas fa-book-open"></i> Выбери свою вселенную
+            </h2>
+            <p style="font-size: 1.2em; opacity: 0.9;">Каждая тема - это новое приключение!</p>
+        </div>
+
+        <div class="topics-grid" id="topicsGrid">
+            <!-- Темы генерируются JavaScript -->
+        </div>
+    </div>
+
+    <!-- СТРАНИЦА ЗАДАЧИ -->
+    <div class="page" id="page-task">
+        <button class="back-button" onclick="showPage('topics')">
+            <i class="fas fa-arrow-left"></i> К темам
+        </button>
+
+        <div class="task-container">
+            <div class="task-header">
+                <div class="task-number" id="taskNumber">Задача 1/15</div>
+                <div class="task-points">
+                    <i class="fas fa-star"></i>
+                    <span id="taskPoints">10 XP</span>
+                </div>
+            </div>
+
+            <h3 class="task-question" id="taskQuestion"></h3>
+
+            <div class="task-data" id="taskData">
+                <h4><i class="fas fa-database"></i> Дано:</h4>
+                <div id="taskDataContent"></div>
+            </div>
+
+            <div class="answer-section">
+                <h4 style="margin-bottom: 15px; color: var(--dark);">
+                    <i class="fas fa-calculator"></i> Твой ответ:
+                </h4>
+                <input type="text" class="answer-input" id="answerInput" 
+                       placeholder="Введи ответ (например: 9.8 или 20 м/с)">
+            </div>
+
+            <div class="buttons-row">
+                <button class="btn btn-hint" onclick="showHint()">
+                    <i class="fas fa-lightbulb"></i> Подсказка
+                </button>
+                <button class="btn btn-solution" onclick="showSolution()">
+                    <i class="fas fa-eye"></i> Решение
+                </button>
+                <button class="btn btn-check" onclick="checkAnswer()">
+                    <i class="fas fa-check"></i> Проверить
+                </button>
+                <button class="btn btn-next" onclick="nextTask()" style="display: none;" id="nextBtn">
+                    <i class="fas fa-forward"></i> Дальше!
+                </button>
+            </div>
+
+            <div class="hint-box" id="hintBox">
+                <div class="hint-title">
+                    <i class="fas fa-lightbulb"></i> Подсказка:
+                </div>
+                <div id="hintContent"></div>
+            </div>
+
+            <div class="solution-box" id="solutionBox">
+                <div class="solution-title">
+                    <i class="fas fa-book"></i> Пошаговое решение:
+                </div>
+                <div id="solutionContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- СТРАНИЦА ИГР -->
+    <div class="page" id="page-games">
+        <button class="back-button" onclick="showPage('main')">
+            <i class="fas fa-arrow-left"></i> На главную
+        </button>
+
+        <div style="text-align: center; margin-bottom: 40px; color: white;">
+            <h2 style="font-size: 2.5em; margin-bottom: 10px;">
+                <i class="fas fa-gamepad"></i> Физические игры
+            </h2>
+            <p style="font-size: 1.2em;">Учись играючи!</p>
+        </div>
+
+        <div class="games-grid">
+            <div class="game-card">
+                <div class="game-preview">🚀</div>
+                <div class="game-info">
+                    <div class="game-title">Гравитационный Прыжок</div>
+                    <div class="game-description">
+                        Помоги астронавту прилуниться! Рассчитай правильную траекторию с учетом гравитации.
+                    </div>
+                    <button class="play-button" onclick="startGame('gravity')">
+                        <i class="fas fa-play"></i> Играть
+                    </button>
+                </div>
+            </div>
+
+            <div class="game-card">
+                <div class="game-preview" style="background: linear-gradient(135deg, #f093fb, #f5576c);">⚡</div>
+                <div class="game-info">
+                    <div class="game-title">Электрическая Цепь</div>
+                    <div class="game-description">
+                        Собери правильную электрическую цепь и зажги лампочку! Изучай законы Ома.
+                    </div>
+                    <button class="play-button" onclick="startGame('circuit')">
+                        <i class="fas fa-play"></i> Играть
+                    </button>
+                </div>
+            </div>
+
+            <div class="game-card">
+                <div class="game-preview" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">🎱</div>
+                <div class="game-info">
+                    <div class="game-title">Законы Столкновений</div>
+                    <div class="game-description">
+                        Бильярд с физикой! Изучай сохранение импульса и энергии на практике.
+                    </div>
+                    <button class="play-button" onclick="startGame('collision')">
+                        <i class="fas fa-play"></i> Играть
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="game-canvas" id="gameCanvas" style="display: none; margin-top: 40px;">
+            <h3 id="gameTitle" style="margin-bottom: 20px; color: var(--dark);"></h3>
+            <div class="game-area" id="gameArea"></div>
+            <div id="gameControls" style="margin-top: 20px;"></div>
+            <button class="btn btn-next" onclick="closeGame()" style="margin-top: 20px;">
+                <i class="fas fa-times"></i> Закрыть игру
+            </button>
+        </div>
+    </div>
+
+    <!-- СТРАНИЦА ОГЭ/ЕГЭ -->
+    <div class="page" id="page-oge">
+        <button class="back-button" onclick="showPage('main')">
+            <i class="fas fa-arrow-left"></i> На главную
+        </button>
+
+        <div style="text-align: center; margin-bottom: 40px; color: white;">
+            <h2 style="font-size: 2.5em; margin-bottom: 10px;">
+                <i class="fas fa-graduation-cap"></i> Подготовка к ОГЭ/ЕГЭ
+            </h2>
+            <p style="font-size: 1.2em;">Все формулы и теория для успешной сдачи!</p>
+        </div>
+
+        <div class="materials-container">
+            <div class="material-card">
+                <div class="material-header">
+                    <div class="material-title">
+                        <span class="topic-badge badge-oge">ОГЭ</span>
+                        Механика - основные формулы
+                    </div>
+                </div>
+                <div class="material-content">
+                    <p><strong>Равномерное движение:</strong></p>
+                    <div class="formula-box">
+                        S = v · t<br>
+                        v = S / t
+                    </div>
+                    
+                    <p><strong>Равноускоренное движение:</strong></p>
+                    <div class="formula-box">
+                        v = v₀ + at<br>
+                        S = v₀t + at²/2<br>
+                        v² - v₀² = 2aS
+                    </div>
+
+                    <p><strong>Второй закон Ньютона:</strong></p>
+                    <div class="formula-box">
+                        F = ma
+                    </div>
+
+                    <p><strong>Закон всемирного тяготения:</strong></p>
+                    <div class="formula-box">
+                        F = G · m₁m₂/r²
+                    </div>
+                </div>
+            </div>
+
+            <div class="material-card">
+                <div class="material-header">
+                    <div class="material-title">
+                        <span class="topic-badge badge-ege">ЕГЭ</span>
+                        Электричество и магнетизм
+                    </div>
+                </div>
+                <div class="material-content">
+                    <p><strong>Закон Ома:</strong></p>
+                    <div class="formula-box">
+                        I = U/R<br>
+                        P = UI = I²R = U²/R
+                    </div>
+
+                    <p><strong>Закон Кулона:</strong></p>
+                    <div class="formula-box">
+                        F = k · q₁q₂/r²
+                    </div>
+
+                    <p><strong>Сила Ампера:</strong></p>
+                    <div class="formula-box">
+                        F = BIl·sin(α)
+                    </div>
+
+                    <p><strong>Электромагнитная индукция:</strong></p>
+                    <div class="formula-box">
+                        ε = -ΔΦ/Δt
+                    </div>
+                </div>
+            </div>
+
+            <div class="material-card">
+                <div class="material-header">
+                    <div class="material-title">
+                        <span class="topic-badge badge-oge">ОГЭ</span>
+                        Термодинамика
+                    </div>
+                </div>
+                <div class="material-content">
+                    <p><strong>Количество теплоты:</strong></p>
+                    <div class="formula-box">
+                        Q = cm(t₂ - t₁)
+                    </div>
+
+                    <p><strong>Уравнение состояния:</strong></p>
+                    <div class="formula-box">
+                        PV = nRT
+                    </div>
+
+                    <p><strong>Первый закон термодинамики:</strong></p>
+                    <div class="formula-box">
+                        ΔU = Q - A
+                    </div>
+                </div>
+            </div>
+
+            <div class="material-card">
+                <div class="material-header">
+                    <div class="material-title">
+                        <span class="topic-badge badge-ege">ЕГЭ</span>
+                        Оптика и квантовая физика
+                    </div>
+                </div>
+                <div class="material-content">
+                    <p><strong>Формула линзы:</strong></p>
+                    <div class="formula-box">
+                        1/F = 1/d + 1/f
+                    </div>
+
+                    <p><strong>Энергия фотона:</strong></p>
+                    <div class="formula-box">
+                        E = hν = hc/λ
+                    </div>
+
+                    <p><strong>Фотоэффект:</strong></p>
+                    <div class="formula-box">
+                        hν = Aвых + Eк
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Новые разделы -->
+            <div class="material-card">
+                <div class="material-header">
+                    <div class="material-title">
+                        <span class="topic-badge badge-oge">ОГЭ</span>
+                        Динамика: Законы Ньютона
+                    </div>
+                </div>
+                <div class="material-content">
+                    <p><strong>Первый закон Ньютона (инерции):</strong></p>
+                    <div class="formula-box">
+                        ΣF = 0 → a = 0
+                    </div>
+                    
+                    <p><strong>Второй закон Ньютона:</strong></p>
+                    <div class="formula-box">
+                        F = ma
+                    </div>
+                    
+                    <p><strong>Третий закон Ньютона (действия и противодействия):</strong></p>
+                    <div class="formula-box">
+                        F₁ = -F₂
+                    </div>
+                    
+                    <p><strong>Сила тяжести:</strong></p>
+                    <div class="formula-box">
+                        Fₜ = mg
+                    </div>
+                    
+                    <p><strong>Сила упругости (закон Гука):</strong></p>
+                    <div class="formula-box">
+                        F = kΔx
+                    </div>
+                </div>
+            </div>
+            
+            <div class="material-card">
+                <div class="material-header">
+                    <div class="material-title">
+                        <span class="topic-badge badge-oge">ОГЭ</span>
+                        Механическая работа и энергия
+                    </div>
+                </div>
+                <div class="material-content">
+                    <p><strong>Механическая работа:</strong></p>
+                    <div class="formula-box">
+                        A = F·s·cosα
+                    </div>
+                    
+                    <p><strong>Кинетическая энергия:</strong></p>
+                    <div class="formula-box">
+                        Eₖ = mv²/2
+                    </div>
+                    
+                    <p><strong>Потенциальная энергия (гравитационная):</strong></p>
+                    <div class="formula-box">
+                        Eₚ = mgh
+                    </div>
+                    
+                    <p><strong>Потенциальная энергия (упругая):</strong></p>
+                    <div class="formula-box">
+                        Eₚ = kx²/2
+                    </div>
+                    
+                    <p><strong>Закон сохранения механической энергии:</strong></p>
+                    <div class="formula-box">
+                        Eₖ₁ + Eₚ₁ = Eₖ₂ + Eₚ₂
+                    </div>
+                </div>
+            </div>
+            
+            <div class="material-card">
+                <div class="material-header">
+                    <div class="material-title">
+                        <span class="topic-badge badge-ege">ЕГЭ</span>
+                        Молекулярная физика
+                    </div>
+                </div>
+                <div class="material-content">
+                    <p><strong>Количество вещества:</strong></p>
+                    <div class="formula-box">
+                        ν = m/μ
+                    </div>
+                    
+                    <p><strong>Уравнение состояния идеального газа:</strong></p>
+                    <div class="formula-box">
+                        pV = νRT
+                    </div>
+                    
+                    <p><strong>Основное уравнение молекулярно-кинетической теории:</strong></p>
+                    <div class="formula-box">
+                        p = (1/3)nm₀v²
+                    </div>
+                    
+                    <p><strong>Средняя кинетическая энергия молекулы:</strong></p>
+                    <div class="formula-box">
+                        Eₖ = (3/2)kT
+                    </div>
+                    
+                    <p><strong>Закон Дальтона:</strong></p>
+                    <div class="formula-box">
+                        p = p₁ + p₂ + ... + pₙ
+                    </div>
+                </div>
+            </div>
+            
+            <div class="material-card">
+                <div class="material-header">
+                    <div class="material-title">
+                        <span class="topic-badge badge-ege">ЕГЭ</span>
+                        Термодинамика
+                    </div>
+                </div>
+                <div class="material-content">
+                    <p><strong>Первый закон термодинамики:</strong></p>
+                    <div class="formula-box">
+                        ΔU = Q - A
+                    </div>
+                    
+                    <p><strong>КПД тепловой машины:</strong></p>
+                    <div class="formula-box">
+                        η = A/Q₁ = 1 - Q₂/Q₁
+                    </div>
+                    
+                    <p><strong>Работа газа при изобарном процессе:</strong></p>
+                    <div class="formula-box">
+                        A = pΔV
+                    </div>
+                    
+                    <p><strong>Количество теплоты при нагревании:</strong></p>
+                    <div class="formula-box">
+                        Q = cmΔT
+                    </div>
+                    
+                    <p><strong>Уравнение теплового баланса:</strong></p>
+                    <div class="formula-box">
+                        Q₁ + Q₂ + ... + Qₙ = 0
+                    </div>
+                </div>
+            </div>
+            
+            <div class="material-card">
+                <div class="material-header">
+                    <div class="material-title">
+                        <span class="topic-badge badge-oge">ОГЭ</span>
+                        Электромагнитные явления
+                    </div>
+                </div>
+                <div class="material-content">
+                    <p><strong>Закон Ома для полной цепи:</strong></p>
+                    <div class="formula-box">
+                        I = ε/(R + r)
+                    </div>
+                    
+                    <p><strong>Магнитный поток:</strong></p>
+                    <div class="formula-box">
+                        Φ = B·S·cosα
+                    </div>
+                    
+                    <p><strong>Закон электромагнитной индукции:</strong></p>
+                    <div class="formula-box">
+                        ε = -ΔΦ/Δt
+                    </div>
+                    
+                    <p><strong>Энергия магнитного поля:</strong></p>
+                    <div class="formula-box">
+                        W = LI²/2
+                    </div>
+                </div>
+            </div>
+            
+            <div class="material-card">
+                <div class="material-header">
+                    <div class="material-title">
+                        <span class="topic-badge badge-ege">ЕГЭ</span>
+                        Колебания и волны
+                    </div>
+                </div>
+                <div class="material-content">
+                    <p><strong>Период пружинного маятника:</strong></p>
+                    <div class="formula-box">
+                        T = 2π√(m/k)
+                    </div>
+                    
+                    <p><strong>Период математического маятника:</strong></p>
+                    <div class="formula-box">
+                        T = 2π√(l/g)
+                    </div>
+                    
+                    <p><strong>Уравнение гармонических колебаний:</strong></p>
+                    <div class="formula-box">
+                        x = A·sin(ωt + φ₀)
+                    </div>
+                    
+                    <p><strong>Скорость волны:</strong></p>
+                    <div class="formula-box">
+                        v = λ·f
+                    </div>
+                </div>
+            </div>
+            
+            <div class="material-card">
+                <div class="material-header">
+                    <div class="material-title">
+                        <span class="topic-badge badge-oge">ОГЭ</span>
+                        Оптика
+                    </div>
+                </div>
+                <div class="material-content">
+                    <p><strong>Закон преломления:</strong></p>
+                    <div class="formula-box">
+                        n₁·sinα₁ = n₂·sinα₂
+                    </div>
+                    
+                    <p><strong>Формула линзы:</strong></p>
+                    <div class="formula-box">
+                        1/F = 1/d + 1/f
+                    </div>
+                    
+                    <p><strong>Угол преломления:</strong></p>
+                    <div class="formula-box">
+                        sinγ = n·sinα
+                    </div>
+                </div>
+            </div>
+            
+            <div class="material-card">
+                <div class="material-header">
+                    <div class="material-title">
+                        <span class="topic-badge badge-ege">ЕГЭ</span>
+                        Квантовая физика
+                    </div>
+                </div>
+                <div class="material-content">
+                    <p><strong>Формула Эйнштейна для фотоэффекта:</strong></p>
+                    <div class="formula-box">
+                        hν = Aвых + Eк
+                    </div>
+                    
+                    <p><strong>Энергия фотона:</strong></p>
+                    <div class="formula-box">
+                        E = hν = hc/λ
+                    </div>
+                    
+                    <p><strong>Момент импульса электрона:</strong></p>
+                    <div class="formula-box">
+                        L = n·ħ
+                    </div>
+                    
+                    <p><strong>Энергия атома водорода:</strong></p>
+                    <div class="formula-box">
+                        Eₙ = -13.6/n² (эВ)
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Глобальные переменные
+        let currentUser = null;
+        let currentTopic = null;
+        let currentTaskIndex = 0;
+        let users = JSON.parse(localStorage.getItem('physicsUsers')) || [];
+        let currentGame = null;
+        let gameInterval = null;
+
+        // Данные тем (32 темы)
+        const topicsData = [
+            // Оригинальные 12 тем
+            {
+                id: 1,
+                title: "Кинематика: Движение тел",
+                icon: "🏃",
+                color: "#FF6584",
+                description: "Скорость, ускорение, путь - изучаем движение!",
+                type: "basic",
+                tasks: generateTasks(15, 10)
+            },
+            {
+                id: 2,
+                title: "Динамика: Законы Ньютона",
+                icon: "🍎",
+                color: "#6C63FF",
+                description: "Силы, масса, ускорение - три мушкетера физики!",
+                type: "basic",
+                tasks: generateTasks(15, 10)
+            },
+            {
+                id: 3,
+                title: "Законы сохранения",
+                icon: "⚡",
+                color: "#43D9E8",
+                description: "Энергия и импульс не исчезают бесследно!",
+                type: "basic",
+                tasks: generateTasks(15, 15)
+            },
+            {
+                id: 4,
+                title: "Молекулярная физика",
+                icon: "🔬",
+                color: "#51CF66",
+                description: "Мир атомов и молекул ждет исследования!",
+                type: "basic",
+                tasks: generateTasks(15, 10)
+            },
+            {
+                id: 5,
+                title: "Термодинамика",
+                icon: "🌡️",
+                color: "#FFD43B",
+                description: "Тепло, работа и внутренняя энергия!",
+                type: "basic",
+                tasks: generateTasks(15, 10)
+            },
+            {
+                id: 6,
+                title: "Электростатика",
+                icon: "⚡",
+                color: "#9775FA",
+                description: "Заряды, поля и потенциалы!",
+                type: "basic",
+                tasks: generateTasks(15, 15)
+            },
+            {
+                id: 7,
+                title: "Постоянный ток",
+                icon: "🔋",
+                color: "#74C0FC",
+                description: "Ток бежит по проводам!",
+                type: "basic",
+                tasks: generateTasks(15, 10)
+            },
+            {
+                id: 8,
+                title: "Магнитное поле",
+                icon: "🧲",
+                color: "#FFA94D",
+                description: "Невидимые силовые линии!",
+                type: "basic",
+                tasks: generateTasks(15, 15)
+            },
+            {
+                id: 9,
+                title: "Колебания и волны",
+                icon: "🌊",
+                color: "#FF8787",
+                description: "От маятника до звуковой волны!",
+                type: "basic",
+                tasks: generateTasks(15, 10)
+            },
+            {
+                id: 10,
+                title: "Оптика",
+                icon: "👁️",
+                color: "#63E6BE",
+                description: "Свет, линзы и зеркала!",
+                type: "basic",
+                tasks: generateTasks(15, 15)
+            },
+            {
+                id: 11,
+                title: "Квантовая физика",
+                icon: "⚛️",
+                color: "#DA77F2",
+                description: "Фотоны, электроны и квантовые чудеса!",
+                type: "advanced",
+                tasks: generateTasks(15, 20)
+            },
+            {
+                id: 12,
+                title: "Атомная физика",
+                icon: "☢️",
+                color: "#FF6B6B",
+                description: "Строение атома и ядра!",
+                type: "advanced",
+                tasks: generateTasks(15, 10)
+            },
+            // Дополнительные 20 тем
+            {
+                id: 13,
+                title: "Гидростатика",
+                icon: "💧",
+                color: "#4ECDC4",
+                description: "Давление в жидкостях и газах",
+                type: "oge",
+                tasks: generateTasks(15, 10)
+            },
+            {
+                id: 14,
+                title: "Аэродинамика",
+                icon: "✈️",
+                color: "#95E1D3",
+                description: "Движение в воздухе",
+                type: "ege",
+                tasks: generateTasks(15, 15)
+            },
+            {
+                id: 15,
+                title: "Переменный ток",
+                icon: "🔄",
+                color: "#F38181",
+                description: "Колебательные контуры и трансформаторы",
+                type: "ege",
+                tasks: generateTasks(15, 15)
+            },
+            {
+                id: 16,
+                title: "Электромагнитные волны",
+                icon: "📡",
+                color: "#AA96DA",
+                description: "Радио, свет, рентген",
+                type: "ege",
+                tasks: generateTasks(15, 15)
+            },
+            {
+                id: 17,
+                title: "Специальная теория относительности",
+                icon: "🚀",
+                color: "#FCBAD3",
+                description: "Эйнштейн и релятивистская физика",
+                type: "ege",
+                tasks: generateTasks(15, 20)
+            },
+            {
+                id: 18,
+                title: "Ядерная физика",
+                icon: "☢️",
+                color: "#A8D8EA",
+                description: "Радиоактивность и ядерные реакции",
+                type: "ege",
+                tasks: generateTasks(15, 15)
+            },
+            {
+                id: 19,
+                title: "Астрономия",
+                icon: "🌌",
+                color: "#FFAAAA",
+                description: "Звезды, планеты, галактики",
+                type: "oge",
+                tasks: generateTasks(15, 10)
+            },
+            {
+                id: 20,
+                title: "Физика плазмы",
+                icon: "🔥",
+                color: "#FFAA71",
+                description: "Четвертое состояние вещества",
+                type: "advanced",
+                tasks: generateTasks(15, 20)
+            },
+            {
+                id: 21,
+                title: "Физика полупроводников",
+                icon: "💻",
+                color: "#C7CEEA",
+                description: "Диоды, транзисторы, микросхемы",
+                type: "ege",
+                tasks: generateTasks(15, 15)
+            },
+            {
+                id: 22,
+                title: "Лазеры и оптоволокно",
+                icon: "💡",
+                color: "#B4F8C8",
+                description: "Когерентный свет и передача данных",
+                type: "ege",
+                tasks: generateTasks(15, 15)
+            },
+            {
+                id: 23,
+                title: "Физика твердого тела",
+                icon: "💎",
+                color: "#FBE7C6",
+                description: "Кристаллы и их свойства",
+                type: "advanced",
+                tasks: generateTasks(15, 20)
+            },
+            {
+                id: 24,
+                title: "Биофизика",
+                icon: "🧬",
+                color: "#A0E7E5",
+                description: "Физика в живых организмах",
+                type: "oge",
+                tasks: generateTasks(15, 10)
+            },
+            {
+                id: 25,
+                title: "Геофизика",
+                icon: "🌍",
+                color: "#87CEEB",
+                description: "Физика Земли и недр",
+                type: "oge",
+                tasks: generateTasks(15, 10)
+            },
+            {
+                id: 26,
+                title: "Физика атмосферы",
+                icon: "🌤️",
+                color: "#DDA0DD",
+                description: "Погода, климат, парниковый эффект",
+                type: "oge",
+                tasks: generateTasks(15, 10)
+            },
+            {
+                id: 27,
+                title: "Нанотехнологии",
+                icon: "🔬",
+                color: "#98D8C8",
+                description: "Физика наномира",
+                type: "advanced",
+                tasks: generateTasks(15, 20)
+            },
+            {
+                id: 28,
+                title: "Квантовые вычисления",
+                icon: "⚛️",
+                color: "#F7DC6F",
+                description: "Кубиты и квантовые компьютеры",
+                type: "advanced",
+                tasks: generateTasks(15, 20)
+            },
+            {
+                id: 29,
+                title: "Физика космоса",
+                icon: "🛸",
+                color: "#F39C12",
+                description: "Черные дыры, нейтронные звезды",
+                type: "ege",
+                tasks: generateTasks(15, 15)
+            },
+            {
+                id: 30,
+                title: "Термоядерный синтез",
+                icon: "☀️",
+                color: "#8E44AD",
+                description: "Энергия звезд на Земле",
+                type: "advanced",
+                tasks: generateTasks(15, 20)
+            },
+            {
+                id: 31,
+                title: "Физика элементарных частиц",
+                icon: "⚛️",
+                color: "#E74C3C",
+                description: "Кварки, лептоны, бозоны",
+                type: "ege",
+                tasks: generateTasks(15, 20)
+            },
+            {
+                id: 32,
+                title: "Физика будущего",
+                icon: "🔮",
+                color: "#6C63FF",
+                description: "Антиматерия, темная энергия, мультивселенная",
+                type: "advanced",
+                tasks: generateTasks(15, 20)
+            }
+        ];
+
+        // Генерация задач
+        function generateTasks(count, basePoints) {
+            const tasks = [];
+            const taskTemplates = [
+                {
+                    question: "Автомобиль движется равномерно со скоростью {v} км/ч. Какой путь он пройдет за {t} секунд?",
+                    solve: (v, t) => {
+                        const v_ms = v / 3.6;
+                        return (v_ms * t).toFixed(1);
+                    },
+                    hint: "Переведи скорость в м/с (раздели на 3.6) и используй формулу S = v·t",
+                    solution: (v, t) => {
+                        const v_ms = (v / 3.6).toFixed(2);
+                        const s = (v_ms * t).toFixed(1);
+                        return [
+                            `Переводим скорость: ${v} км/ч = ${v_ms} м/с`,
+                            `Используем формулу равномерного движения: S = v·t`,
+                            `S = ${v_ms} м/с · ${t} с = ${s} м`
+                        ];
+                    }
+                },
+                {
+                    question: "Тело массой {m} кг падает с высоты {h} м. Какова его кинетическая энергия у поверхности земли? (g = 10 м/с²)",
+                    solve: (m, h) => (m * 10 * h).toFixed(0),
+                    hint: "Используй закон сохранения энергии: Eк = mgh",
+                    solution: (m, h) => {
+                        const e = m * 10 * h;
+                        return [
+                            `По закону сохранения энергии потенциальная энергия переходит в кинетическую`,
+                            `Eк = mgh = ${m}·10·${h} = ${e} Дж`
+                        ];
+                    }
+                },
+                {
+                    question: "На тело массой {m} кг действует сила {F} Н. Какое ускорение получит тело?",
+                    solve: (m, F) => (F / m).toFixed(2),
+                    hint: "Второй закон Ньютона: F = ma, отсюда a = F/m",
+                    solution: (m, F) => {
+                        const a = (F / m).toFixed(2);
+                        return [
+                            `Записываем второй закон Ньютона: F = ma`,
+                            `Выражаем ускорение: a = F/m`,
+                            `a = ${F} Н / ${m} кг = ${a} м/с²`
+                        ];
+                    }
+                }
+            ];
+
+            for (let i = 0; i < count; i++) {
+                const template = taskTemplates[i % taskTemplates.length];
+                const v = 36 + Math.floor(Math.random() * 108); // 36-144 км/ч
+                const t = 10 + Math.floor(Math.random() * 50); // 10-60 с
+                const m = 1 + Math.floor(Math.random() * 20); // 1-20 кг
+                const h = 5 + Math.floor(Math.random() * 45); // 5-50 м
+                const F = 10 + Math.floor(Math.random() * 90); // 10-100 Н
+
+                let question = template.question;
+                let answer = "";
+                let hint = template.hint;
+                let solution = [];
+
+                if (template.question.includes("{v}")) {
+                    question = question.replace("{v}", v).replace("{t}", t);
+                    answer = template.solve(v, t);
+                    solution = template.solution(v, t);
+                } else if (template.question.includes("{m}") && template.question.includes("{h}")) {
+                    question = question.replace("{m}", m).replace("{h}", h);
+                    answer = template.solve(m, h);
+                    solution = template.solution(m, h);
+                } else if (template.question.includes("{m}") && template.question.includes("{F}")) {
+                    question = question.replace("{m}", m).replace("{F}", F);
+                    answer = template.solve(m, F);
+                    solution = template.solution(m, F);
+                }
+
+                tasks.push({
+                    question: question,
+                    data: ["Дано в условии задачи"],
+                    answer: answer,
+                    hint: hint,
+                    solution: solution,
+                    points: basePoints + Math.floor(Math.random() * 10),
+                    solved: false
+                });
+            }
+            return tasks;
+        }
+
+        // Инициализация
+        window.onload = function() {
+            createParticles();
+            checkAuth();
+        };
+
+        // Создание частиц
+        function createParticles() {
+            const container = document.getElementById('particles');
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 15 + 's';
+                particle.style.animationDuration = (Math.random() * 10 + 10) + 's';
+                container.appendChild(particle);
+            }
+        }
+
+      // Навигация
+function showPage(pageName) {
+    // 1. Скрываем все страницы
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    
+    // 2. Находим нужную страницу
+    const targetPage = document.getElementById('page-' + pageName);
+    targetPage.classList.add('active');
+
+    // 3. Логика для конкретных страниц
+    if (pageName === 'topics' && currentUser) {
+        renderTopics();
+    } else if (pageName === 'profile' && currentUser) {
+        loadProfile();
+    }
+
+    // 4. ПЛАВНАЯ ПРОКРУТКА С ОТСТУПОМ
+    setTimeout(() => {
+        // Получаем позицию элемента относительно верха страницы
+        const elementPosition = targetPage.getBoundingClientRect().top;
+        const offsetPosition = elementPosition + window.pageYOffset - 100; // 100px отступ для навбара
+
+        window.scrollTo({
+            top: offsetPosition,
+            behavior: 'smooth' // Включает плавность
+        });
+        
+        // Автофокус на поле ввода (для удобства)
+        if (pageName === 'login') {
+            const input = document.getElementById('loginUsername');
+            if(input) setTimeout(() => input.focus(), 300); // Фокус с задержкой, чтобы не сбивать прокрутку
+        } else if (pageName === 'register') {
+            const input = document.getElementById('regUsername');
+            if(input) setTimeout(() => input.focus(), 300);
+        }
+    }, 50);
+}
+
+        // Регистрация
+        function handleRegister(e) {
+            e.preventDefault();
+            const username = document.getElementById('regUsername').value;
+            const email = document.getElementById('regEmail').value;
+            const password = document.getElementById('regPassword').value;
+            const passwordConfirm = document.getElementById('regPasswordConfirm').value;
+
+            if (password !== passwordConfirm) {
+                showNotification('Пароли не совпадают!', 'error');
+                return;
+            }
+
+            if (users.find(u => u.email === email || u.username === username)) {
+                showNotification('Пользователь уже существует!', 'error');
+                return;
+            }
+
+            const newUser = {
+                username,
+                email,
+                password,
+                avatar: null,
+                points: 0,
+                solved: 0,
+                streak: 0,
+                level: 1,
+                results: [],
+                created: new Date().toISOString()
+            };
+
+            users.push(newUser);
+            localStorage.setItem('physicsUsers', JSON.stringify(users));
+            
+            showNotification('Регистрация успешна! Теперь войдите.', 'success');
+            setTimeout(() => showPage('login'), 1500);
+        }
+
+        // Вход
+        function handleLogin(e) {
+            e.preventDefault();
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+
+            const user = users.find(u => 
+                (u.email === username || u.username === username) && u.password === password
+            );
+
+            if (user) {
+                currentUser = user;
+                localStorage.setItem('currentUser', JSON.stringify(user));
+                updateNav();
+                showNotification(`Добро пожаловать, ${user.username}!`, 'success');
+                setTimeout(() => showPage('main'), 1000);
+            } else {
+                showNotification('Неверный email или пароль!', 'error');
+            }
+        }
+
+        // Выход
+        function logout() {
+            currentUser = null;
+            localStorage.removeItem('currentUser');
+            updateNav();
+            showPage('main');
+            showNotification('Вы вышли из системы', 'success');
+        }
+
+        // Проверка авторизации
+        function checkAuth() {
+            const saved = localStorage.getItem('currentUser');
+            if (saved) {
+                currentUser = JSON.parse(saved);
+                updateNav();
+            }
+        }
+
+        // Обновление навигации
+        function updateNav() {
+            const navbar = document.getElementById('navbar');
+            const authButtons = document.getElementById('authButtons');
+            const userButtons = document.getElementById('userButtons');
+            const logoutBtn = document.getElementById('logoutBtn');
+            const navAvatar = document.getElementById('navAvatar');
+
+            if (currentUser) {
+                navbar.style.display = 'flex';
+                authButtons.style.display = 'none';
+                userButtons.style.display = 'block';
+                logoutBtn.style.display = 'flex';
+                
+                if (currentUser.avatar) {
+                    navAvatar.src = currentUser.avatar;
+                }
+                navAvatar.style.display = 'block';
+            } else {
+                navbar.style.display = 'none';
+                authButtons.style.display = 'block';
+                userButtons.style.display = 'none';
+                logoutBtn.style.display = 'none';
+                navAvatar.style.display = 'none';
+            }
+        }
+
+        // Загрузка профиля
+        function loadProfile() {
+            if (!currentUser) return;
+
+            document.getElementById('profileName').textContent = currentUser.username;
+            document.getElementById('profileEmail').textContent = currentUser.email;
+            document.getElementById('statPoints').textContent = currentUser.points;
+            document.getElementById('statSolved').textContent = currentUser.solved;
+            document.getElementById('statStreak').textContent = currentUser.streak;
+            document.getElementById('profileLevel').textContent = currentUser.level;
+
+            const avatar = document.getElementById('profileAvatar');
+            if (currentUser.avatar) {
+                avatar.src = currentUser.avatar;
+            } else {
+                avatar.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%236C63FF'/%3E%3Ctext x='50' y='50' text-anchor='middle' dy='.3em' fill='white' font-size='40'%3E👤%3C/text%3E%3C/svg%3E";
+            }
+
+            // Загрузка результатов
+            const resultsList = document.getElementById('resultsList');
+            if (currentUser.results && currentUser.results.length > 0) {
+                resultsList.innerHTML = currentUser.results.map(r => `
+                    <div class="result-item">
+                        <div>
+                            <div class="result-topic">${r.topic}</div>
+                            <div style="color: #666; font-size: 0.9em;">${new Date(r.date).toLocaleDateString()}</div>
+                        </div>
+                        <div class="result-score">${r.points} XP</div>
+                    </div>
+                `).join('');
+            } else {
+                resultsList.innerHTML = '<p style="color: #666; text-align: center;">Пока нет результатов</p>';
+            }
+        }
+
+        // Загрузка аватара
+        function uploadAvatar(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    currentUser.avatar = e.target.result;
+                    saveUser();
+                    loadProfile();
+                    updateNav();
+                    showNotification('Фото профиля обновлено!', 'success');
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // Сохранение пользователя
+        function saveUser() {
+            const index = users.findIndex(u => u.email === currentUser.email);
+            if (index !== -1) {
+                users[index] = currentUser;
+                localStorage.setItem('physicsUsers', JSON.stringify(users));
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            }
+        }
+
+        // Отрисовка тем
+        function renderTopics() {
+            const grid = document.getElementById('topicsGrid');
+            grid.innerHTML = '';
+            
+            topicsData.forEach(topic => {
+                const card = document.createElement('div');
+                card.className = 'topic-card';
+                card.onclick = () => selectTopic(topic.id);
+                
+                const solvedInTopic = topic.tasks.filter(t => t.solved).length;
+                const progress = (solvedInTopic / topic.tasks.length) * 100;
+                
+                let badge = '';
+                if (topic.type === 'oge') badge = '<span class="topic-badge badge-oge">ОГЭ</span>';
+                else if (topic.type === 'ege') badge = '<span class="topic-badge badge-ege">ЕГЭ</span>';
+                else if (topic.type === 'game') badge = '<span class="topic-badge badge-game">ИГРА</span>';
+                
+                card.innerHTML = `
+                    <span class="topic-icon">${topic.icon}</span>
+                    <div class="topic-title">${topic.title}</div>
+                    <div class="topic-desc">${topic.description}</div>
+                    ${badge}
+                    <div style="margin-top: 15px; font-size: 0.9em; color: #666;">
+                        <i class="fas fa-tasks"></i> ${topic.tasks.length} задач | 
+                        <i class="fas fa-check-circle"></i> ${solvedInTopic} решено
+                    </div>
+                    <div class="progress-bar" style="width: 100%; height: 8px; background: #E9ECEF; border-radius: 10px; margin-top: 10px; overflow: hidden;">
+                        <div style="height: 100%; background: linear-gradient(90deg, var(--success), var(--accent)); border-radius: 10px; width: ${progress}%"></div>
+                    </div>
+                `;
+                
+                grid.appendChild(card);
+            });
+        }
+
+        // Выбор темы
+        function selectTopic(topicId) {
+            currentTopic = topicsData.find(t => t.id === topicId);
+            currentTaskIndex = 0;
+            loadTask();
+            showPage('task');
+        }
+
+        // Загрузка задачи
+        function loadTask() {
+            const task = currentTopic.tasks[currentTaskIndex];
+            
+            document.getElementById('taskNumber').textContent = 
+                `Задача ${currentTaskIndex + 1}/${currentTopic.tasks.length}`;
+            document.getElementById('taskPoints').textContent = `${task.points} XP`;
+            document.getElementById('taskQuestion').textContent = task.question;
+            
+            const dataHtml = task.data.map(d => 
+                `<div class="data-item"><i class="fas fa-angle-right"></i> ${d}</div>`
+            ).join('');
+            document.getElementById('taskDataContent').innerHTML = dataHtml;
+            
+            document.getElementById('answerInput').value = '';
+            document.getElementById('hintBox').style.display = 'none';
+            document.getElementById('solutionBox').style.display = 'none';
+            document.getElementById('nextBtn').style.display = 'none';
+        }
+
+        // Показать подсказку
+        function showHint() {
+            const task = currentTopic.tasks[currentTaskIndex];
+            document.getElementById('hintContent').textContent = task.hint;
+            document.getElementById('hintBox').style.display = 'block';
+        }
+
+        // Показать решение
+        function showSolution() {
+            const task = currentTopic.tasks[currentTaskIndex];
+            const stepsHtml = task.solution.map((step, i) => `
+                <div class="solution-step">
+                    <div class="step-number">${i + 1}</div>
+                    <div class="step-content">${step}</div>
+                </div>
+            `).join('');
+            
+            document.getElementById('solutionContent').innerHTML = stepsHtml;
+            document.getElementById('solutionBox').style.display = 'block';
+        }
+
+        // Проверка ответа
+        function checkAnswer() {
+            const task = currentTopic.tasks[currentTaskIndex];
+            const userAnswer = document.getElementById('answerInput').value.trim().toLowerCase();
+            const correctAnswer = task.answer.toString().toLowerCase();
+            
+            const isCorrect = userAnswer === correctAnswer || 
+                             Math.abs(parseFloat(userAnswer) - parseFloat(correctAnswer)) < 0.1;
+            
+            if (isCorrect) {
+                if (!task.solved) {
+                    task.solved = true;
+                    currentUser.points += task.points;
+                    currentUser.solved++;
+                    currentUser.streak++;
+                    
+                    // Повышение уровня
+                    currentUser.level = Math.floor(currentUser.points / 100) + 1;
+                    
+                    // Сохранение результата
+                    currentUser.results.push({
+                        topic: currentTopic.title,
+                        points: task.points,
+                        date: new Date().toISOString()
+                    });
+                    
+                    saveUser();
+                    createConfetti();
+                }
+                document.getElementById('nextBtn').style.display = 'flex';
+                showNotification(`Правильно! +${task.points} XP`, 'success');
+            } else {
+                currentUser.streak = 0;
+                saveUser();
+                showNotification('Неверно. Попробуй еще раз!', 'error');
+            }
+        }
+
+        // Следующая задача
+        function nextTask() {
+            currentTaskIndex++;
+            if (currentTaskIndex >= currentTopic.tasks.length) {
+                showNotification(`Тема "${currentTopic.title}" завершена!`, 'success');
+                showPage('topics');
+            } else {
+                loadTask();
+            }
+        }
+
+        function startGame(gameType) {
+    currentGame = gameType;
+    
+    // 1. Показываем блок игры
+    const gameCanvas = document.getElementById('gameCanvas');
+    gameCanvas.style.display = 'block';
+    
+    // 2. Инициализируем конкретную игру
+    if (gameType === 'gravity') {
+        initGravityGame();
+    } else if (gameType === 'circuit') {
+        initCircuitGame();
+    } else if (gameType === 'collision') {
+        initCollisionGame();
+    }
+
+    // 3. ГАРАНТИРОВАННАЯ ПЛАВНАЯ ПРОКРУТКА К ИГРЕ
+    // Делаем это с небольшой задержкой, чтобы браузер успел отрисовать блок
+    setTimeout(() => {
+        gameCanvas.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'center' // Прокручивает так, чтобы игра была по центру экрана
+        });
+    }, 100);
+}
+
+        function initGravityGame() {
+            document.getElementById('gameTitle').textContent = '🚀 Гравитационный Прыжок';
+            const area = document.getElementById('gameArea');
+            const controls = document.getElementById('gameControls');
+            
+            // Создаем Луну и астронавта
+            area.innerHTML = `
+                <div style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); font-size: 60px;">🌕</div>
+                <div id="astronaut" class="game-object" style="font-size: 40px; left: 50px; bottom: 150px;">👨‍🚀</div>
+            `;
+            
+            controls.innerHTML = `
+                <p style="margin-bottom: 15px;">Введи начальную скорость (м/с): <input type="number" id="velocity" value="10" style="padding: 10px; width: 100px; margin: 0 10px;"></p>
+                <button class="btn btn-check" onclick="launchAstronaut()">Запустить!</button>
+            `;
+        }
+
+        function launchAstronaut() {
+            const v = parseFloat(document.getElementById('velocity').value);
+            const astronaut = document.getElementById('astronaut');
+            let pos = 150;
+            let velocity = v;
+            const g = 1.6; // гравитация Луны
+            
+            if (gameInterval) clearInterval(gameInterval);
+            
+            gameInterval = setInterval(() => {
+                velocity -= g * 0.1;
+                pos += velocity;
+                
+                if (pos <= 20) {
+                    pos = 20;
+                    velocity = -velocity * 0.5;
+                    if (Math.abs(velocity) < 1) {
+                        clearInterval(gameInterval);
+                        showNotification('Посадка успешна! 🎉', 'success');
+                    }
+                }
+                
+                astronaut.style.bottom = pos + 'px';
+            }, 100);
+        }
+
+        function initCircuitGame() {
+            document.getElementById('gameTitle').textContent = '⚡ Электрическая Цепь';
+            const area = document.getElementById('gameArea');
+            const controls = document.getElementById('gameControls');
+            
+            area.innerHTML = `
+                <div style="display: flex; justify-content: space-around; align-items: center; height: 100%; padding: 40px;">
+                    <div style="font-size: 60px;">🔋</div>
+                    <div style="font-size: 40px;" id="wire1">❓</div>
+                    <div style="font-size: 60px;">💡</div>
+                    <div style="font-size: 40px;" id="wire2">❓</div>
+                    <div style="font-size: 60px;">🔌</div>
+                </div>
+            `;
+            
+            controls.innerHTML = `
+                <p style="margin-bottom: 15px;">Выбери сопротивление (Ом): 
+                    <button class="btn" onclick="setResistance(10)">10 Ом</button>
+                    <button class="btn" onclick="setResistance(100)">100 Ом</button>
+                    <button class="btn" onclick="setResistance(1000)">1000 Ом</button>
+                </p>
+                <p id="circuitResult" style="margin-top: 15px; font-weight: 700;"></p>
+            `;
+        }
+
+        function setResistance(r) {
+            const v = 12; // Вольт
+            const i = (v / r).toFixed(3);
+            document.getElementById('circuitResult').innerHTML = 
+                `Напряжение: ${v}В, Сопротивление: ${r}Ом<br>Ток: I = U/R = ${v}/${r} = ${i} А`;
+            
+            if (r <= 100) {
+                document.getElementById('wire1').textContent = '💡';
+                document.getElementById('wire2').textContent = '💡';
+                showNotification('Лампочка горит! Отлично!', 'success');
+            } else {
+                document.getElementById('wire1').textContent = '💡';
+                document.getElementById('wire2').textContent = '🌑';
+                showNotification('Слишком большое сопротивление!', 'error');
+            }
+        }
+
+        function initCollisionGame() {
+            document.getElementById('gameTitle').textContent = '🎱 Законы Столкновений';
+            const area = document.getElementById('gameArea');
+            const controls = document.getElementById('gameControls');
+            
+            area.innerHTML = `
+                <div id="ball1" class="game-object" style="font-size: 50px; left: 100px; top: 175px;">🔴</div>
+                <div id="ball2" class="game-object" style="font-size: 50px; left: 500px; top: 175px;">🔵</div>
+            `;
+            
+            controls.innerHTML = `
+                <p style="margin-bottom: 15px;">Скорость первого шара (м/с): <input type="number" id="speed1" value="5" style="padding: 10px; width: 80px; margin: 0 5px;"></p>
+                <button class="btn btn-check" onclick="startCollision()">Столкнуть!</button>
+                <p id="collisionResult" style="margin-top: 15px; font-weight: 700;"></p>
+            `;
+        }
+
+        function startCollision() {
+            const v1 = parseFloat(document.getElementById('speed1').value);
+            const ball1 = document.getElementById('ball1');
+            const ball2 = document.getElementById('ball2');
+            let pos1 = 100;
+            let pos2 = 500;
+            let velocity1 = v1;
+            let velocity2 = 0;
+            
+            if (gameInterval) clearInterval(gameInterval);
+            
+            gameInterval = setInterval(() => {
+                pos1 += velocity1;
+                
+                if (pos1 >= pos2 - 50) {
+                    // Столкновение
+                    const newV1 = 0;
+                    const newV2 = velocity1;
+                    velocity1 = newV1;
+                    velocity2 = newV2;
+                    
+                    document.getElementById('collisionResult').innerHTML = 
+                        `Закон сохранения импульса:<br>m·v₁ = m·v₂<br>${v1} м/с → ${velocity2} м/с`;
+                }
+                
+                pos2 += velocity2;
+                
+                ball1.style.left = pos1 + 'px';
+                ball2.style.left = pos2 + 'px';
+                
+                if (pos2 > 750) {
+                    clearInterval(gameInterval);
+                    showNotification('Столкновение завершено!', 'success');
+                }
+            }, 20);
+        }
+
+        function closeGame() {
+            if (gameInterval) clearInterval(gameInterval);
+            document.getElementById('gameCanvas').style.display = 'none';
+            currentGame = null;
+        }
+
+        // Отправка результатов на email
+        function sendResultsToEmail() {
+            if (!currentUser) return;
+            
+            const subject = `Результаты обучения - ${currentUser.username}`;
+            const body = `
+Пользователь: ${currentUser.username}
+Email: ${currentUser.email}
+Уровень: ${currentUser.level}
+
+СТАТИСТИКА:
+- Всего очков: ${currentUser.points}
+- Решено задач: ${currentUser.solved}
+- Текущая серия: ${currentUser.streak}
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚀</text></svg>">
+ИСТОРИЯ РЕШЕНИЙ:
+${currentUser.results.map(r => `- ${r.topic}: ${r.points} XP (${new Date(r.date).toLocaleDateString()})`).join('\n')}
+
+Дата отправки: ${new Date().toLocaleString()}
+            `.trim();
+            
+            // Создаем mailto ссылку
+            const mailtoLink = `mailto:zavul@vk.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+            
+            // Открываем почтовый клиент
+            window.location.href = mailtoLink;
+            
+            showNotification('Открывается почтовый клиент...', 'success');
+            
+            // Также сохраняем в localStorage для истории
+            const sentReports = JSON.parse(localStorage.getItem('sentReports') || '[]');
+            sentReports.push({
+                date: new Date().toISOString(),
+                to: 'zavul@vk.com',
+                subject: subject,
+                userData: currentUser
+            });
+            localStorage.setItem('sentReports', JSON.stringify(sentReports));
+        }
+
+        // Уведомления
+        function showNotification(text, type) {
+            const notif = document.getElementById('notification');
+            const notifText = document.getElementById('notificationText');
+            
+            notif.className = 'notification show ' + type;
+            notifText.textContent = text;
+            
+            setTimeout(() => {
+                notif.classList.remove('show');
+            }, 3000);
+        }
+
+        // Конфетти
+        function createConfetti() {
+            const colors = ['#FF6584', '#6C63FF', '#43D9E8', '#51CF66', '#FFD43B'];
+            for (let i = 0; i < 50; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = Math.random() * 100 + '%';
+                confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.animationDelay = Math.random() * 0.5 + 's';
+                document.body.appendChild(confetti);
+                
+                setTimeout(() => confetti.remove(), 3000);
+            }
+        }
+
+        // Обработка Enter
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && document.getElementById('answerInput') && 
+                document.getElementById('page-task').classList.contains('active')) {
+                checkAnswer();
+            }
+        });
+    </script>
+</body>
+</html>
